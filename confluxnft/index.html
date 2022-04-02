@@ -80,6 +80,8 @@
             <div id="tab1" class="weui-tab__bd-item weui-tab__bd-item--active">
                 <div class="pagelayout">
                     <div class="weui-cells__tips">DAPP 仅显示本合约下的 NFT，<a target="_blank" style="color: red;" href="https://confluxscan.io/nft-checker" id="opennftchecker2">点击这里可以前往 CFX 区块链浏览器查看所有 NFT</a>。</div>
+                    <div class="weui-cells__tips">DAPP 调用的合约 <span style="font-size: 8px;">cfx:acgy248usza4u1v97nbjms9fstmt1684ujngxf7p7h</span> 已完成合约源码验证。</div>
+                    <div class="weui-cells__tips" id="nfttotalmsg"></div>
                     <div class="weui-cells__tips" id="nftcountmsg"></div>
                     <div>
                         <div id="nftlist" class="weui-grids"></div>
@@ -350,6 +352,10 @@
     var nftDataList = {};
 
     function nftCountFun(){
+        myContract.totalSupply().call().then(res => {
+            $('#nfttotalmsg').text('当前合约共有 ' + (res[0] ? res[0] : 0) + ' 个 NFT。');
+        });
+
         myContract.balanceOf(currentAccount).call().then(res => {
             $('#nftcountmsg').text('当前有 ' + (res[0] ? res[0] : 0) + ' 个 NFT。');
             nftCount = res[0];
