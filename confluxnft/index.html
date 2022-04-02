@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conflux NFT</title>
+    <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css"> -->
+    <link rel="stylesheet" href="./style/weui.min.css">
+    <link rel="stylesheet" href="./style/jquery-weui.min.css">
+    <link rel="shortcut icon" href="./image/myicon.webp">
+
+    <style>
+        .demos-header {
+            height: 64px;
+            padding: 20px;
+        }
+        .demos-title {
+            text-align: center;
+            font-size: 34px;
+            color: #0DB27C;
+            font-weight: 400;
+            margin: 0 15%;
+        }
+        .connectWallet{
+            position: absolute;
+            right: 30px;
+            top: 10px;
+            text-align: center;
+        }
+
+        #walletmsg{
+            width: 130px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pagelayout{
+            padding: 0 10% 10% 10%;
+        }
+
+        .weui-grid__icon {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+
+        .present{
+            width: 32px;
+            float: right;
+        }
+
+    </style>
+
+</head>
+<body>
+    <header class="demos-header">
+        <h1 class="demos-title">Conflux NFT</h1>
+        <div class="connectWallet" id="connectWallet">
+            <img height="64px" src="./image/fluentjpg.jpg">
+            <p id="walletmsg">连接 Fluent 钱包</p>
+        </div>
+    </header>
+
+    <div class="weui-tab">
+        <div class="weui-navbar">
+            <div class="weui-navbar__item weui_bar__item_on" href="#tab1">
+              我的 NFT
+            </div>
+            <div class="weui-navbar__item" href="#tab2">
+              铸造 NFT
+            </div>
+            <div class="weui-navbar__item" href="#tab3">
+                工具
+            </div>
+        </div>
+        <div class="weui-tab__bd">
+            <div id="tab1" class="weui-tab__bd-item weui-tab__bd-item--active">
+                <div class="pagelayout">
+                    <div class="weui-cells__tips">仅显示本合约下的 NFT。</div>
+                    <div class="weui-cells__tips" id="nftcountmsg"></div>
+                    <div>
+                        <div id="nftlist" class="weui-grids"></div>
+                    </div>
+                    <div class="weui-loadmore" id="loading">
+                        <i class="weui-loading"></i>
+                        <span class="weui-loadmore__tips">正在加载</span>
+                    </div>
+                </div>
+            </div>
+            <div id="tab2" class="weui-tab__bd-item">
+              <div class="pagelayout">
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cells__tips">合约完全遵守 ERC721 标准。NFT 一经铸造会与区块链共存亡，不能销毁、修改，没有后门函数，即使是合约作者也无法干涉合约。</div>
+                    <div class="weui-cells__tips">新铸造的 NFT 归属权是支付 gas 费用的账户。NFT 的元数据扩展文件、图片都存储在 IPFS。铸造的 NFT 可以自由转让。</div>
+                    <div class="weui-cells__tips" style="color: blue;">提示：NFT 铸造完成后需要大约3至15分钟能够正常访问图片，因为 IPFS 需要一点时间完成节点的同步。</div>
+                    <div class="weui-cells__tips" style="color: blue;">提示：NFT 铸造完成后需要大约1分钟才能在 我的NFT 界面查看到，因为区块确认交易要一点时间。</div>
+                    <div class="weui-cells__tips" style="color: blue;">提示：<a target="_blank" style="color: red;" href="https://confluxscan.io/nft-checker" id="opennftchecker">点击这里可以前往 CFX 区块链浏览器查看铸造的 NFT</a>。</div>
+                    <div class="weui-cells__tips" style="color: blue;">提示：NFT 铸造要将数据存到链上需要支付 gas 费用，支付的费用中有 0.1 cfx 是支付到合约的运维费用。</div>
+
+                    <div class="weui-cell">
+                      <div class="weui-cell__hd"><label class="weui-label">NFT 名称</label></div>
+                      <div class="weui-cell__bd">
+                        <input class="weui-input" type="text" id="nftname" name="nftname" placeholder="请输入 NFT 名称">
+                      </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">NFT 描述</label></div>
+                        <div class="weui-cell__bd">
+                          <input class="weui-input" type="text" id="nftdescription" name="nftdescription" placeholder="请输入 NFT 描述">
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                          <div class="weui-uploader">
+                            <div class="weui-uploader__hd">
+                              <p class="weui-uploader__title">NFT 图片</p>
+                              <div class="weui-uploader__info">请选择一张图片上传</div>
+                            </div>
+                            <div class="weui-uploader__bd">
+                              <div class="weui-uploader__input-box">
+                                <input id="uploaderInput" class="weui-uploader__input" type="file" accept="image/*" onchange="chooseImage(this)" multiple="">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_primary" href="javascript:" id="mint">铸造</a>
+                    </div>
+                    <div class="weui-cells__tips">本程序仅限软件开发技术交流使用，用于其它途径者后果自负。</div>
+                    <div class="weui-cells__tips">预览只是缩略图，实际上传的图片不会被压缩或剪裁。</div>
+                    <image style="max-width:50%;" id="uploadimage" class="weui-uploader__img" src="" mode="aspectFill" />
+                </div>
+              </div>
+            </div>
+            <div id="tab3" class="weui-tab__bd-item">
+                <div class="pagelayout">
+                    <div class="weui-panel__bd">
+                        <div class="weui-media-box weui-media-box_small-appmsg" id="toolsListView">
+                          <div class="weui-cells">
+                            <a class="weui-cell weui-cell_access" href="javascript:;" onclick="watchAsset()">
+                              <div class="weui-cell__hd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAMAAABgZ9sFAAAAVFBMVEXx8fHMzMzr6+vn5+fv7+/t7e3d3d2+vr7W1tbHx8eysrKdnZ3p6enk5OTR0dG7u7u3t7ejo6PY2Njh4eHf39/T09PExMSvr6+goKCqqqqnp6e4uLgcLY/OAAAAnklEQVRIx+3RSRLDIAxE0QYhAbGZPNu5/z0zrXHiqiz5W72FqhqtVuuXAl3iOV7iPV/iSsAqZa9BS7YOmMXnNNX4TWGxRMn3R6SxRNgy0bzXOW8EBO8SAClsPdB3psqlvG+Lw7ONXg/pTld52BjgSSkA3PV2OOemjIDcZQWgVvONw60q7sIpR38EnHPSMDQ4MjDjLPozhAkGrVbr/z0ANjAF4AcbXmYAAAAASUVORK5CYII=" alt="" style="width:20px;margin-right:5px;display:block"></div>
+                              <div class="weui-cell__bd weui-cell_primary">
+                                <p>添加 NFT Token 到钱包</p>
+                              </div>
+                              <span class="weui-cell__ft"></span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/js-conflux-sdk/dist/js-conflux-sdk.umd.min.js"></script>-->
+<!-- <script src="https://cdn.jsdelivr.net/npm/ipfs-http-client/dist/index.min.js"></script> -->
+<script type="text/javascript" src="./lib/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="./lib/jquery-weui.min.js"></script>
+<script type="text/javascript" src="./lib/js-conflux-sdk.umd.min.js"></script>
+<script type="text/javascript" src="./lib/ipfs-http-client-index.min.js"></script>
+<script type="text/javascript" src="./script/contractCommon.js"></script>
+
+<script>
+    const options = { host: 'ipfs.infura.io', port: '5001', protocol: 'https' };
+    const myipfs = IpfsHttpClient.create(options);
+
+    currentChainid = '';
+    currentAccount = '';
+
+    $('#connectWallet').click(function(){
+        if (typeof window.conflux !== 'undefined' && conflux.isFluent) {
+            requestAccounts();
+        }else{
+            alert('请先安装 Fluent');
+        }
+    });
+
+    $(function(){
+        if (typeof window.conflux !== 'undefined' && conflux.isFluent){
+            requestAccounts();
+            conflux.on('accountsChanged', accounts => {
+                console.log('accountsChanged');
+                currentAccount = accounts[0];
+                viewAccount();
+            });
+
+            conflux.on('chainChanged', chainid => {
+                currentChainid = chainid;
+            });
+        }
+    });
+
+    // connect wallet account
+    function requestAccounts(){
+        conflux.request({method: "cfx_requestAccounts"}).then(accounts => {
+            currentAccount = accounts[0];
+            $('#opennftchecker').attr({ href: 'https://confluxscan.io/nft-checker/' + currentAccount});
+            viewAccount();
+            // init contract object
+            initMyContract(function(){
+                nftCountFun();
+            });
+
+            if(currentAccount && currentAccount.toLocaleLowerCase() == contractOwner.toLocaleLowerCase()){
+                let item = `<div class="weui-cells">
+                    <a class="weui-cell weui-cell_access" href="javascript:;" onclick="withdraw()">
+                        <div class="weui-cell__hd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAMAAABgZ9sFAAAAVFBMVEXx8fHMzMzr6+vn5+fv7+/t7e3d3d2+vr7W1tbHx8eysrKdnZ3p6enk5OTR0dG7u7u3t7ejo6PY2Njh4eHf39/T09PExMSvr6+goKCqqqqnp6e4uLgcLY/OAAAAnklEQVRIx+3RSRLDIAxE0QYhAbGZPNu5/z0zrXHiqiz5W72FqhqtVuuXAl3iOV7iPV/iSsAqZa9BS7YOmMXnNNX4TWGxRMn3R6SxRNgy0bzXOW8EBO8SAClsPdB3psqlvG+Lw7ONXg/pTld52BjgSSkA3PV2OOemjIDcZQWgVvONw60q7sIpR38EnHPSMDQ4MjDjLPozhAkGrVbr/z0ANjAF4AcbXmYAAAAASUVORK5CYII=" alt="" style="width:20px;margin-right:5px;display:block"></div>
+                        <div class="weui-cell__bd weui-cell_primary">
+                        <p>withdraw</p>
+                        </div>
+                        <span class="weui-cell__ft"></span>
+                    </a>
+                </div>`;
+                $('#toolsListView').append(item);
+            }
+
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+
+    function viewAccount(){
+        msg = currentAccount;
+        if (10 < currentAccount.length){
+            msg = '...'+ currentAccount.substring(currentAccount.length - 10,currentAccount.length);
+        }
+        $('#walletmsg').text(msg);
+    }
+</script>
+<script>
+/******************************** mint begin *******************************/
+    $('#mint').click(mint);
+
+    var myfileTemp;
+
+    // 1-上传图片 2-上传元数据 3-调用合约支付 gas 费铸造
+    async function mint(){
+        let nftname = $('#nftname').val();
+        let nftdescription = $('#nftdescription').val();
+        console.log(nftname+'==='+nftdescription);
+        if(!nftname || 1 > nftname.length){
+            $.toptip('请输入 NFT 名称', 'error');
+            return;
+        }
+        if(!nftdescription || 1 > nftdescription.length){
+            $.toptip('请输入 NFT 描述', 'error');
+            return;
+        }  
+
+        $.showLoading('铸造中，请勿退出。');
+        // 1.upload image
+        let added;
+        try{
+            added = await myipfs.add(myfileTemp);
+        }catch (error){
+            $.hideLoading();
+            $.toptip('IPFS 访问失败 images', 'error');
+            $.toast("IPFS 访问失败，开启 VPN 试试。", "forbidden");
+            return;
+        }
+        console.log(added);
+        if (!added || !added.path){
+            $.hideLoading();
+            $.toptip('IPFS 访问失败 images', 'error');
+            return;
+        }
+        let path = 'ipfs://'+ added.path;
+
+        // 2.upload metadata
+        let metadata = parseMetadata(nftname,nftdescription,path);
+        console.log(metadata);
+        const metadatares = await myipfs.add(JSON.stringify(metadata));
+        console.log(metadatares);
+        if(!metadatares || !metadatares.path){
+            $.hideLoading();
+            $.toptip('IPFS 访问失败 metadata', 'error');
+            return;
+        }
+        const tokenuri = 'ipfs://' + metadatares.path;
+        try{
+            // 3.mint pay 0.1 cfx
+            let result = await myContract.safeMint(currentAccount,tokenuri).sendTransaction({from: currentAccount,value: myDrip.fromCFX(0.1)}).executed();
+            console.log(result);
+            if (result){
+                $.toptip('铸造成功，即将跳转。', 'success');
+                setTimeout(() => {
+                    $.hideLoading();
+                    location.reload();
+                }, 1500);
+            }else{
+                $.toptip('铸造失败', 'error');
+            }
+        }catch(error){
+            $.hideLoading();
+        }
+    }
+
+    function chooseImage(e) {
+        var reads = new FileReader()
+        f = document.getElementById('uploaderInput').files[0]
+        myfileTemp = f;
+        reads.readAsDataURL(f)
+        reads.onload = function (e) {
+            document.getElementById('uploadimage').src = this.result
+        }
+    }
+
+    function parseMetadata(nftname,nftdescription,imageurl){
+        // return JSON.parse(`{
+        //     "description": "`+ nftdescription +`",
+        //     "image": "`+ imageurl +`",
+        //     "name": "`+ nftname +`",
+        //     "properties": {
+        //         "author": "bg174-`+ currentAccount +`"
+        //     }
+        // }`);
+        return JSON.parse(`{
+            "description": "`+ nftdescription +`",
+            "image": "`+ imageurl +`",
+            "name": "`+ nftname +`",
+            "properties": {
+                "author": "bg174-`+ currentAccount +`"
+            },
+            "imageUri": "`+ imageurl +`",
+            "imageName": {
+                "en": "`+ nftname +`",
+                "zh": "`+ nftname +`"
+            }
+        }`);
+    }
+
+    
+/******************************** mint end *******************************/
+
+</script>
+<script>
+
+    // /******************      mynft   begin    *******************************/
+    // nftcountmsg
+    var nftCount = 0;
+    var nftDataList = {};
+
+    function nftCountFun(){
+        myContract.balanceOf(currentAccount).call().then(res => {
+            $('#nftcountmsg').text('当前有 ' + (res[0] ? res[0] : 0) + ' 个 NFT。');
+            nftCount = res[0];
+            if (nftCount){
+                initListView();
+            }else{
+                $('#loading').hide();
+            }
+        });
+    }
+
+    function initListView(){
+        for (let i=0;i<nftCount;i++){
+            myContract.tokenOfOwnerByIndex(currentAccount,i).call().then(res => {
+                console.log('tokenOfOwnerByIndex 根据索引查询tokenid');
+                console.log(res);
+                let tokenid = res[0];
+                if (!tokenid){
+                    tokenid = 0;
+                }
+                getTokenURI(tokenid);
+            });
+        }
+    }
+
+    function getTokenURI(tokenid){
+        myContract.tokenURI(tokenid).call().then(res => {
+            console.log('根据 tokenid 查询');
+            console.log(res);
+            getMetaData(res,tokenid);
+        });
+    }
+
+    function getMetaData(ipfsuri,tokenid){
+        ipfsuri = getIPFSData(ipfsuri);
+        $.getJSON(ipfsuri, function(res){
+            $('#loading').hide();
+            console.log(res);
+            
+            nftDataList[tokenid] = res;
+
+            imguri = getIPFSData(res.image);
+            let item = `<div class="weui-grid js_grid">
+                            <div class="weui-grid__icon" onclick="toNFTInfo(`+ tokenid +`)">
+                                <img src="`+ imguri +`" alt="">
+                            </div>
+                            <p class="weui-grid__label">
+                            `+ res.name +` # `+ tokenid +`
+                                <img class="present" src="./image/present.png" alt="" onclick="presentNFT(`+ tokenid +`)">
+                            </p>
+                        </div>`;
+            $('#nftlist').append(item);
+        });
+    }
+    
+    function toNFTInfo(tokenid){
+        let info = nftDataList[tokenid];
+        info.tokenid = tokenid;
+        window.open("./page/nftinfo.html?info="+encodeURI(JSON.stringify(info)));
+    }
+
+    function presentNFT(tokenid){
+        let nft = nftDataList[tokenid];
+        $.prompt({
+            title: '赠送 NFT',
+            text: '确定要将【' + nft.name + ' # ' + tokenid + '】 赠送给它人就在下方填入对方账号',
+            input: '',
+            empty: false,
+            onOK: function (input) {
+                console.log(input);
+                safeTransferFrom(tokenid,input);
+            },
+            onCancel: function () {
+                console.log('cancel');
+            }
+        });
+    }
+
+    async function safeTransferFrom(tokenid,to){
+        let nft = nftDataList[tokenid];
+        $.showLoading();
+        try{
+            let res = await myContract.safeTransferFrom(currentAccount,to,tokenid).sendTransaction({from: currentAccount}).executed();
+            console.log(res);
+            $.hideLoading();
+            if (res){
+                location.reload();
+            }else{
+                $.toptip('失败', 'error');
+            }
+        }catch{
+            $.hideLoading();
+        }
+    }
+    // /******************      mynft    end   *******************************/
+
+
+    /**************************     tools   begin   ************************************/
+
+    function withdraw(){
+        $.showLoading();
+        myContract.withdraw().sendTransaction({from: currentAccount}).then(result => {
+            console.log(result);
+            $.hideLoading();
+        });
+    }
+
+    function watchAsset(){
+            conflux.request({
+                method: 'wallet_watchAsset',
+                params: {
+                type: 'ERC20',
+                options: {
+                    address: contractAddress,
+                    symbol: mySymbol,
+                    decimals: 0,
+                    image: './image/myicon.webp',
+                },
+                },
+            })
+            .then((success) => {
+                if (success) {
+                    console.log('成功添加到钱包');
+                } else {
+                    throw new Error('Something went wrong.');
+                }
+            })
+            .catch(console.error);
+        }
+
+    /**************************     tools   end   ************************************/
+
+</script>
+</html>

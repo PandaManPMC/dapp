@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT 详情</title>
+    <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css"> -->
+    <link rel="stylesheet" href="../style/weui.min.css">
+    <link rel="stylesheet" href="../style/jquery-weui.min.css">
+    <style>
+        .pagelayout{
+            padding: 10% 10% 10% 10%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="pagelayout">
+        <div>
+            <img style="max-width: 80%;" id="nftimage" src="" alt="">
+        </div>
+        <div>
+            <div class="weui-cells">
+                <a class="weui-cell weui-cell_access" href="javascript:;">
+                  <div class="weui-cell__bd weui-cell_primary">
+                    <p>NFT 名称：<span id="nftname"></span></p>
+                  </div>
+                </a>
+            </div>
+        </div>
+        <div>
+            <div class="weui-cells">
+                <a class="weui-cell weui-cell_access" href="javascript:;">
+                  <div class="weui-cell__bd weui-cell_primary">
+                    <p>NFT 描述：<span id="nftdescription"></span></p>
+                  </div>
+                </a>
+            </div>
+        </div>
+        <div>
+            <div id="author" class="weui-panel__hd">文字组合列表</div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../lib/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="../lib/jquery-weui.min.js"></script>
+<script src="../script/contractCommon.js"></script>
+<script>
+    $(function(){
+        let info = getQueryVariable('info');
+        let nftObject = JSON.parse(decodeURI(info));
+        console.log(nftObject);
+        $('#nftimage').attr({ src: getIPFSData(nftObject.image), alt: "NFT Image" });
+        $('#nftname').text(nftObject.name + ' # ' + nftObject.tokenid);
+        $('#nftdescription').text(nftObject.description);
+        $('#author').text(nftObject.properties ? nftObject.properties.author : '');
+    });
+</script>
+</html>
