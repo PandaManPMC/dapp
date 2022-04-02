@@ -79,7 +79,7 @@
         <div class="weui-tab__bd">
             <div id="tab1" class="weui-tab__bd-item weui-tab__bd-item--active">
                 <div class="pagelayout">
-                    <div class="weui-cells__tips">仅显示本合约下的 NFT。</div>
+                    <div class="weui-cells__tips">DAPP 仅显示本合约下的 NFT，<a target="_blank" style="color: red;" href="https://confluxscan.io/nft-checker" id="opennftchecker2">点击这里可以前往 CFX 区块链浏览器查看所有 NFT</a>。</div>
                     <div class="weui-cells__tips" id="nftcountmsg"></div>
                     <div>
                         <div id="nftlist" class="weui-grids"></div>
@@ -202,6 +202,8 @@
         conflux.request({method: "cfx_requestAccounts"}).then(accounts => {
             currentAccount = accounts[0];
             $('#opennftchecker').attr({ href: 'https://confluxscan.io/nft-checker/' + currentAccount});
+            $('#opennftchecker2').attr({ href: 'https://confluxscan.io/nft-checker/' + currentAccount});
+
             viewAccount();
             // init contract object
             initMyContract(function(){
