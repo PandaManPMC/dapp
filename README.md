@@ -8,3 +8,9 @@
 > - 使用地址 https://nft.aboshe.cn/
 
 
+## mmSign
+
+> mmSign MetaMask 签名例子。
+> - 使用 npm 进行包管理。
+
+
