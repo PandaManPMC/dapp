@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask Demo</title>
+    <!-- MetaMask 呈现的站点图标 -->
+    <link rel="shortcut icon" href="http://pdmfs.aboshe.cn:23120/favicon.ico" />
+</head>
+<body>
+    <h1>MetaMask 相关 API</h1>
+    <div><input type="button" style="padding: 10px;" value="连接到钱包" onclick="eth_requestAccounts()"/></div>
+    <div><input type="button" style="padding: 10px;" value="转账" onclick="sendTransaction()"/></div>
+    <div><input type="button" style="padding: 10px;" value="移除账户变更通知" onclick="removeAccountsChangedListener()"/></div>
+    <div><input type="button" style="padding: 10px;" value="添加 token 合约资产到钱包" onclick="watchAsset()"/></div>
+    <div><input type="button" style="padding: 10px;" value="转账 ERC20 代币" onclick="sendTransactionToken()"/></div>
+    <script src="../lib/bn.js"></script>
+</body>
+    <!-- web3js -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        var connAccount;
+        window.onload = function (){
+            if (typeof ethereum.isMetaMask !== 'undefined') {
+                console.log('MetaMask is installed!');
+                setTimeout(function(){
+                    eth_requestAccounts();
+                },500);
+                
+                // 地址更改时收到通知
+                ethereum.on('accountsChanged', onAccountsChanged);
+
+                // 连接钱包事件
+                ethereum.on('connect', connectInfo => {
+                    console.log("连接钱包事件：",connectInfo);
+                });
+            }else{
+                alert('请先安装 MetaMask');
+                return;
+            }
+        };
+
+        function eth_requestAccounts(){
+            // 连接到 MetaMask 钱包
+            ethereum.request({ method: 'eth_requestAccounts' }).then((accounts) => {
+                console.log(accounts);
+                connAccount = accounts[0];
+            }).catch((error) => {
+                if (error.code === 4001) {
+                    alert('请连接 MetaMask');
+                } else {
+                    console.error(error);
+                }
+            });
+        }
+
+        function onAccountsChanged(accounts){
+            // Time to reload your interface with accounts[0]!
+            console.log(accounts);
+            connAccount = accounts[0];
+        }
+
+        // 移除账户变更通知
+        function removeAccountsChangedListener(){
+            ethereum.removeListener('accountsChanged', onAccountsChanged);
+        }
+
+        // 转账，发送以太币
+        function sendTransaction(){
+            // 1 个 val.toJSON() 转为16进制
+            var val = new BN('1000000000000000000',10);
+            const transactionParameters = {
+                to: '0x98647263f8e52F755a6ba22FC3325AEF180f1289', // 收款
+                from: ethereum.selectedAddress, // 当前钱包选择的地址
+                value: val.toJSON(),
+            };
+
+            ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [transactionParameters],
+            })  .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                console.log('出现异常');
+                if (error.code === 4001) {
+                    console.log("被拒绝或未连接 MetaMask");
+                } else {
+                    console.error(error);
+                }
+            });
+        }
+
+        // 添加 ERC20 token 资产到 MetaMask 钱包
+        function watchAsset(){
+            ethereum
+            .request({
+                method: 'wallet_watchAsset',
+                params: {
+                type: 'ERC20',
+                options: {
+                    address: '0x445e9AbA3ABDa19e76d9aC0A77C63F5d24941501',
+                    symbol: 'PDMAPC',
+                    decimals: 18,
+                    image: 'http://pdmfs.aboshe.cn:23120/favicon.ico',
+                },
+                },
+            })
+            .then((success) => {
+                if (success) {
+                    console.log('成功添加到钱包');
+                } else {
+                    throw new Error('Something went wrong.');
+                }
+            })
+            .catch(console.error);
+        }
+
+        // 转账，发送 ERC20 代币
+        function sendTransactionToken(){
+            var val = new BN('1000000000000000000',10);
+            // 生成 合约的 transfer 函数的 ABI 编码
+            let dataAbi = getTransferABI('0x98647263f8e52F755a6ba22FC3325AEF180f1289',val.toString());
+            console.log(dataAbi);
+
+            const transactionParameters = {
+                to: '0x445e9AbA3ABDa19e76d9aC0A77C63F5d24941501', // 合约地址
+                from: ethereum.selectedAddress, 
+                data: dataAbi, // 函数+参数 的 abi 编码
+            };
+
+            ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [transactionParameters],
+            })  .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                console.log('出现异常');
+                if (error.code === 4001) {
+                    console.log("被拒绝或未连接 MetaMask");
+                } else {
+                    console.error(error);
+                }
+            });
+        }
+
+        // ERC20 transfer 函数调用的签名
+        function getTransferABI(toAddress, tokenAmount) {
+            const web3 = new Web3();
+            const TRANSFER_FUNCTION_ABI = {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"};
+            return web3.eth.abi.encodeFunctionCall(TRANSFER_FUNCTION_ABI, [
+                toAddress,
+                tokenAmount
+            ]);
+        }
+    </script>
+</html>

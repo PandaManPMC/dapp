@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web3js测试</title>
+
+    <!-- head 中 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
+    <!-- body 最后 -->
+    <script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+    <!-- 如果使用了某些拓展插件还需要额外的JS -->
+    <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/swiper.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/city-picker.min.js"></script>
+    <!-- web3js -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+</head>
+<body>
+    <input type="button" onclick="open()" value="测试1"/>
+</body>
+    <script>
+        // 建立 rinkeby 测试网的连接
+        window.web3 = new Web3("https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
+        console.log("web3版本：",web3.version);
+        web3.eth.getAccounts(console.log);
+
+        // 查询当前区块高度：
+        web3.eth.getBlockNumber().then(console.log);
+        // 指定账户余额：
+        web3.eth.getBalance("0x861caF1c18feE1F3e1De005C40f322e9c3eA774E").then(console.log);
+
+        const hash = '0x4a205ec3c3df1dd5f1926d3001456c89fa58375e9f35a2719c40f10c41ceb9bf';
+        // 通过hash查询交易：
+        web3.eth.getTransaction(hash).then(console.log);
+        // 查询交易Receipt
+        web3.eth.getTransactionReceipt(hash).then(console.log);
+        // 节点正在挖矿true，未在挖矿false
+        web3.eth.isMining().then(console.log);
+        // gas 价格预言机，gas 价格由最后几个区块的中间 gas 价格决定。
+        web3.eth.getGasPrice().then(console.log);
+
+
+        function getBalance(){
+            // 获取当前metamask账户地址的eth余额
+            web3.eth.getCoinbase((err, coinbase) =>{
+                web3.eth.getBalance(coinbase).then(console.log);
+            })
+        }
+
+        function sendTransaction(){
+            web3.eth.sendTransaction({
+                from: '0x861caF1c18feE1F3e1De005C40f322e9c3eA774E',
+                to: '0x98647263f8e52F755a6ba22FC3325AEF180f1289',
+                value: '100000000000000000'
+            })
+            .then(function(receipt){
+                console.log(receipt);
+            });
+        }
+
+        function createAccount(){
+            web3.eth.accounts.create().then(console.log);
+        }
+
+        window.onload = function (){
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask is installed!');
+            }else{
+                alert('请先安装 MetaMask');
+            }
+        };
+
+        function open(){
+            console.log("open");
+            let web3 = new Web3(window.web3.currentProvider)
+            let fromAddress = web3.eth.accounts[0];
+            let ethContract = web3.eth.contract("代币合约Abi")
+            let functionInstance = ethContract.at("0xEE7d0D7117fE5151760c9dce29F53BFeeEDed34f")
+            functionInstance.balanceOf(fromAddress,(err, res) => {
+            if (!err) {
+                //代币精度根据所发行的代币合约精度换算 
+                console.log("代币余额==",res.toNumber()/Math.pow(10,18));
+            }
+            })
+        }
+
+    </script>
+</html>
