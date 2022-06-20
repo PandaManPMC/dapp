@@ -14,3 +14,9 @@
 > - 使用 npm 进行包管理。
 
 
+## transparent
+
+> transparent 透明代理模式合约升级例子，包括 web3.js 调用。
+
+
+
