@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+
+    <div style="padding: 10%">
+        <h3>存储数据</h3>
+        <div class="weui-cells__title">数据 key</div>
+        <div class="weui-cells">
+          <div class="weui-cell">
+            <div class="weui-cell__bd">
+              <input id="setKey" class="weui-input" type="text" placeholder="请输入存储 string key">
+            </div>
+          </div>
+        </div>
+        <div class="weui-cells__title">数据 value</div>
+        <div class="weui-cells">
+          <div class="weui-cell">
+            <div class="weui-cell__bd">
+              <input id="setValue" class="weui-input" type="number" placeholder="请输入存储 uint256 value">
+            </div>
+          </div>
+        </div>
+        <button onclick="callSet();" class="weui-btn weui-btn_primary">调用 addProduct</button>
+        <h3>读取数据</h3>
+        <div class="weui-cells__title">数据 key</div>
+        <div class="weui-cells">
+          <div class="weui-cell">
+            <div class="weui-cell__bd">
+              <input id="getKey" class="weui-input" type="text" placeholder="请输入 string key">
+            </div>
+          </div>
+        </div>
+        <button onclick="callGet();" class="weui-btn weui-btn_primary">调用 getProductPrice</button>
+        <div class="weui-cells__title">返回值</div>
+        <div id="result"></div>
+
+        <div class="weui-cells__title">新合约地址</div>
+        <div class="weui-cells">
+          <div class="weui-cell">
+            <div class="weui-cell__bd">
+              <input id="upgradeToAddress" class="weui-input" type="texy" placeholder="请输入新逻辑合约地址">
+            </div>
+          </div>
+        </div>
+        <button onclick="upgradeTo();" class="weui-btn weui-btn_primary">调用 upgradeTo 更新合约</button>
+
+    </div>
+
+</body>
+<script>
+
+    const contractAddress = "0x85E7fBbC9643514bC66828AadfD18345E4327D6a";
+    var myContract;
+    var connAccount;
+
+    $(function(){
+        if (typeof ethereum.isMetaMask !== 'undefined') {
+            eth_requestAccounts();
+            initMyContract();
+        }else{
+            alert('请先安装 MetaMask');
+            return;
+        }
+    });
+
+    function eth_requestAccounts(){
+        ethereum.request({ method: 'eth_requestAccounts' }).then((accounts) => {
+            connAccount = accounts[0];
+        }).catch((error) => {
+            if (error.code === 4001) {
+                alert('请连接 MetaMask');
+            } else {
+                console.error(error);
+            }
+        });
+    }
+
+    // 读取 jsonInterface
+    function initMyContract(){
+        $.getJSON('./data/abi.json', function(res){
+            jsonInterface = res;
+            web3 = new Web3(Web3.givenProvider || "https://evmtestnet.confluxrpc.com");
+            myContract = new web3.eth.Contract(jsonInterface, contractAddress);
+        })
+    }
+
+    function callSet(){
+        $.showLoading();
+        myContract.methods.addProduct($('#setKey').val(),$('#setValue').val()).send({from: connAccount},function(error, transactionHash){
+            if (error) {
+                $.hideLoading();
+                console.log(error);
+                $('#result').html(JSON.stringify(error));
+                return
+            }
+            console.log(transactionHash);
+            $('#result').html(transactionHash);
+            $.hideLoading();
+        });
+    }
+
+    function callGet(){
+        myContract.methods.getProductPrice($('#getKey').val()).call().then(res => {
+            $.showLoading();
+            console.log(res);
+            $('#result').html(res);
+            $.hideLoading();
+        });
+    }
+
+    function upgradeTo(){
+        if(!web3.utils.isAddress($('#upgradeToAddress').val())){
+            $.toast("地址不合法", "forbidden");
+            return;
+        }
+        $.showLoading();
+        myContract.methods.upgradeTo($('#upgradeToAddress').val()).send({from: connAccount},function(error, transactionHash){
+            if (error) {
+                $.hideLoading();
+                console.log(error);
+                $('#result').html(JSON.stringify(error));
+                return
+            }
+            console.log(transactionHash);
+            $('#result').html(transactionHash);
+            $.hideLoading();
+        });
+    }
+    
+
+</script>
+</html>
